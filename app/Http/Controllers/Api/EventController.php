@@ -15,9 +15,26 @@ class EventController extends Controller
      */
     public function index()
     {
-        // return Event::all();
+        // change the params (string) and returning an array -> explode. And delete space in string -> str_replace
+        $includes = explode(
+            ',',
+            str_replace(
+                ' ',
+                '',
+                request()->query('include')
+            )
+        );
+
+        $query = Event::query();
+
+
+        if (!empty($includes)) {
+            // laravel Eloquent already handle array in with() -> we don't have to do foreach
+            $query->with($includes);
+        }
+
         return EventResource::collection(
-            Event::with('user')->paginate()
+            $query->latest()->paginate()
         );
     }
 
