@@ -5,36 +5,21 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EventRequest;
 use App\Http\Resources\EventResource;
+use App\Http\Traits\CanLoadRelationships;
 use App\Models\Event;
 use Illuminate\Http\Request;
 
 class EventController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    use CanLoadRelationships;
+
+    private array $relations = ['user', 'attendees', 'attendees.user', 'attendees.event'];
+
     public function index()
     {
-        // change the params (string) and returning an array -> explode. And delete space in string -> str_replace
-        $includes = explode(
-            ',',
-            str_replace(
-                ' ',
-                '',
-                request()->query('include')
-            )
-        );
-
-        $query = Event::query();
-
-
-        if (!empty($includes)) {
-            // laravel Eloquent already handle array in with() -> we don't have to do foreach
-            $query->with($includes);
-        }
 
         return EventResource::collection(
-            $query->latest()->paginate()
+            $this->loadRelationships(Event::query())->latest()->paginate()
         );
     }
 

@@ -4,18 +4,24 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AttendeeResource;
+use App\Http\Traits\CanLoadRelationships;
 use App\Models\Attendee;
 use App\Models\Event;
 use Illuminate\Http\Request;
 
 class AttendeeController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
+    use CanLoadRelationships;
+
+    private $relations = ['event', 'user'];
+
     public function index(Event $event)
     {
-        $attendees = $event->attendees()->latest();
+        // get query from relationship attendees() -> bcs cant make query if its hasMany method
+        $attendeesQuery = $event->attendees()->getQuery();
+
+        $attendees = $this->loadRelationships($attendeesQuery)->latest();
 
         return AttendeeResource::collection(
             $attendees->paginate()
