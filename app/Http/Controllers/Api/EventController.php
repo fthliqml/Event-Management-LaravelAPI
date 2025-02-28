@@ -30,7 +30,7 @@ class EventController extends Controller
     {
 
         $event = Event::create([
-            'user_id' => 1,
+            'user_id' => $request->user()->id,
             ...$request->validated()
         ]);
 
@@ -44,7 +44,7 @@ class EventController extends Controller
     public function show(Event $event)
     {
         // $event->load('user', 'attendees');
-        return new EventResource($event);
+        return new EventResource($this->loadRelationships($event));
     }
 
     /**
@@ -69,11 +69,21 @@ class EventController extends Controller
      */
     public function destroy(Event $event)
     {
+        $event->load('user');
         $event->delete();
 
         return response()->json([
             'message' => 'Event deleted successfully',
-            'data' => $event
+            'data' => array_merge(
+                $event->only([
+                    "id",
+                    "name",
+                    "description",
+                    "start_time",
+                    "end_time",
+                ]),
+                ['user' => $event->user->only(['name'])]
+            )
         ]);
     }
 }
