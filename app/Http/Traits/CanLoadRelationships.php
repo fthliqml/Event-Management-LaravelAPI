@@ -5,12 +5,13 @@ namespace App\Http\Traits;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 trait CanLoadRelationships
 {
-    public function loadRelationships(QueryBuilder|EloquentBuilder $for, array $relations = null)
+    public function loadRelationships(QueryBuilder|EloquentBuilder|HasMany|Model $for, array $relations = [])
     {
-        $relations = $relations ?? $this->relations ?? [];
+        $relations = empty($relations) ? $this->relations : $relations;
         // change the params (string) and returning an array -> explode. And delete space in string -> str_replace
         // array filter -> deleting item if its ""
         $includes = array_filter(
@@ -24,7 +25,6 @@ trait CanLoadRelationships
             )
         );
 
-        $query = $for;
 
         foreach ($includes as $index => $relation) {
             if (!in_array($relation, $relations)) {
@@ -33,10 +33,12 @@ trait CanLoadRelationships
         }
 
         if (!empty($includes)) {
-            // laravel Eloquent already handle array in with() -> we don't have to do foreach
-            $query->with($includes);
+            $for instanceof Model ?
+                $for->load($includes) :
+                $for->with($includes);
+
         }
 
-        return $query;
+        return $for;
     }
 }

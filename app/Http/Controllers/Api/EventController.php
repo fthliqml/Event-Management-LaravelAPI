@@ -34,7 +34,7 @@ class EventController extends Controller
             ...$request->validated()
         ]);
 
-        return new EventResource($event);
+        return new EventResource($event->load('user'));
 
     }
 
@@ -43,7 +43,7 @@ class EventController extends Controller
      */
     public function show(Event $event)
     {
-        $event->load('user', 'attendees');
+        // $event->load('user', 'attendees');
         return new EventResource($event);
     }
 

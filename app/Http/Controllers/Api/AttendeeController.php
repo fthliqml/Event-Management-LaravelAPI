@@ -18,14 +18,10 @@ class AttendeeController extends Controller
 
     public function index(Event $event)
     {
-        // get query from relationship attendees() -> bcs cant make query if its hasMany method
-        $attendeesQuery = $event->attendees()->getQuery();
+        $attendeesQuery = $event->attendees();
+        $attendees = $this->loadRelationships($attendeesQuery)->latest()->paginate();
 
-        $attendees = $this->loadRelationships($attendeesQuery)->latest();
-
-        return AttendeeResource::collection(
-            $attendees->paginate()
-        );
+        return AttendeeResource::collection($attendees);
     }
 
     /**
@@ -51,7 +47,7 @@ class AttendeeController extends Controller
     public function show(Event $event, Attendee $attendee)
     {
         // laravel automatically get attendee on specific event because we use scoped()
-        return new AttendeeResource($attendee);
+        return new AttendeeResource($this->loadRelationships($attendee));
     }
 
 
