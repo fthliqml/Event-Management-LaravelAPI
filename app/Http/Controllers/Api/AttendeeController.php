@@ -19,6 +19,8 @@ class AttendeeController extends Controller
 
     public function index(Event $event)
     {
+        Gate::authorize('viewAny', Attendee::class);
+
         $attendeesQuery = $event->attendees();
         $attendees = $this->loadRelationships($attendeesQuery)->latest()->paginate();
 
@@ -34,6 +36,8 @@ class AttendeeController extends Controller
         //     'user_id' => 'required|integer'
         // ]);
 
+        Gate::authorize('create', Attendee::class);
+
         $attendees = $event->attendees()->create([
             'user_id' => 1
         ]);
@@ -47,6 +51,7 @@ class AttendeeController extends Controller
      */
     public function show(Event $event, Attendee $attendee)
     {
+        Gate::authorize('view', $attendee);
         // laravel automatically get attendee on specific event because we use scoped()
         return new AttendeeResource($this->loadRelationships($attendee));
     }
@@ -57,7 +62,8 @@ class AttendeeController extends Controller
      */
     public function destroy(Event $event, Attendee $attendee)
     {
-        Gate::authorize('delete-attendee', [$event, $attendee]);
+        // Gate::authorize('delete-attendee', [$event, $attendee]);
+        Gate::authorize('delete', $attendee);
 
         $attendee->delete();
 

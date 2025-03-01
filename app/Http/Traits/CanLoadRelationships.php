@@ -25,7 +25,6 @@ trait CanLoadRelationships
             )
         );
 
-
         foreach ($includes as $index => $relation) {
             if (!in_array($relation, $relations)) {
                 unset($includes[$index]);
