@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Traits\HasValidationRules;
 use Illuminate\Foundation\Http\FormRequest;
 
 class EventRequest extends FormRequest
 {
+    use HasValidationRules;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -21,11 +24,6 @@ class EventRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'start_time' => 'required|date',
-            'end_time' => 'required|date|after:start_time'
-        ];
+        return $this->eventRules();
     }
 }
