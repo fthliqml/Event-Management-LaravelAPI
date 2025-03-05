@@ -3,10 +3,11 @@
 namespace App\Console\Commands;
 
 use App\Models\Event;
+use App\Notifications\EventReminderNotification;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 
-class sendEventReminders extends Command
+class SendEventReminders extends Command
 {
     /**
      * The name and signature of the console command.
@@ -43,7 +44,9 @@ class sendEventReminders extends Command
 
         $events->each(
             fn($event) => $event->attendees->each(
-                fn($attendee) => $this->info("Notifying the user {$attendee->user->name}")
+                fn($attendee) => $attendee->user->notify(
+                    new EventReminderNotification($event)
+                )
             )
         );
 
